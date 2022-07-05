@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"net"
 	"sync"
 )
@@ -38,13 +39,22 @@ func main() {
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
-		var buf []byte
-		fmt.Println("连续发整数1~10")
-		for i := 1; i <= 10; i++ {
-			buf = append(buf, IntToBytes(i)...)
-		}
-		for i := 0; i < len(buf); i++ {
-			conn.Write(buf[i : i+1])
+		for i := 0; i < 4; i++ {
+			buf := make([]byte, 0)
+			ar1 := make([]int, 0)
+			suijishu := rand.Intn(10)
+			fmt.Println("这次要随机发：", suijishu, "个数字，让服务器给我算和")
+			buf = append(buf, IntToBytes(suijishu)...)
+			for k := 0; k < suijishu; k++ {
+				a1 := rand.Intn(10)
+				ar1 = append(ar1, a1)
+				buf = append(buf, IntToBytes(a1)...)
+			}
+			buflen := len(buf)
+			for j := 0; j < buflen; j++ {
+				conn.Write(buf[j : j+1])
+			}
+			fmt.Println(suijishu, "个数字发完了，分别是：", ar1)
 		}
 		wg.Done()
 	}()

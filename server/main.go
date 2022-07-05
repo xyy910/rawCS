@@ -57,6 +57,36 @@ func printAddTwo(conn *net.TCPConn) {
 	}
 }
 
+func printAddMany(conn *net.TCPConn) {
+	zongchangdu := make([]byte, 4)
+	var err error
+	for {
+		_, err := io.ReadFull(conn, zongchangdu)
+		if err != nil {
+			break
+		}
+		l2 := BytesToInt(zongchangdu)
+		fmt.Println("客户端说，他要给我发", l2, "个数字，让我算和")
+		allbytes := make([]byte, l2*4)
+		_, err = io.ReadFull(conn, allbytes)
+		if err != nil {
+			break
+		}
+		sum := 0
+		var ar1 []int
+		for i := 0; i < l2; i++ {
+			a1 := BytesToInt(allbytes[i : (i+1)*4])
+			ar1 = append(ar1, a1)
+			sum += a1
+		}
+		fmt.Println("算出来了，和是：", sum, "数组是：", ar1)
+		conn.Write(IntToBytes(sum))
+	}
+	if err == io.EOF {
+		fmt.Println("完了，完了，芭比Q了", err)
+	}
+}
+
 func BytesToInt(b []byte) int {
 	bytesBuffer := bytes.NewBuffer(b)
 	var x int32
@@ -87,6 +117,6 @@ func main() {
 			log.Fatalln("accept出错啦：", err)
 		}
 		fmt.Println("咦！有个臭活现上钩了！", conn.RemoteAddr())
-		go printAddTwo(conn)
+		go printAddMany(conn)
 	}
 }
