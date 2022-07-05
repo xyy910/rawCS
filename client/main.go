@@ -5,9 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"log"
-	"math/rand"
 	"net"
-	"time"
 )
 
 func IntToBytes(n int) []byte {
@@ -36,13 +34,12 @@ func main() {
 	//fmt.Println("客户端发送了：", n)
 
 	var buf []byte
-	fmt.Println("连续发整数1~100")
+	fmt.Println("连续发整数1~10")
 	for i := 1; i <= 10; i++ {
 		buf = append(buf, IntToBytes(i)...)
 	}
-	for i :=0; i<len(buf); i++ {
-		conn.Write(buf[i:i+1])
-		time.Sleep(time.Millisecond * time.Duration(rand.Intn(20)))
+	for i := 0; i < len(buf); i++ {
+		conn.Write(buf[i : i+1])
 	}
 
 }

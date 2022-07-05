@@ -11,21 +11,23 @@ import (
 
 func printShow(conn *net.TCPConn) {
 	buff := make([]byte, 1024)
-	changdu, err := conn.Read(buff)
 	var res []byte
-	for changdu > 0 && err == nil {
-		fmt.Println("收到了", changdu, "err是：", err)
+	var err error
+	for {
+		changdu, err := conn.Read(buff)
 		res = append(res, buff[0:changdu]...)
+		fmt.Println("收到了", changdu, "err是：", err, "现在res的长度是: ", len(res))
 		xianyoude := len(res)
-		if xianyoude/4 > 0{
+		if xianyoude/4 > 0 {
 			var res1 []int
 			i := 0
-			for ; i<xianyoude/4; i++ {
+			for ; i < xianyoude/4; i++ {
 				res1 = append(res1, BytesToInt(res[i*4:(i+1)*4]))
 			}
 			res = res[i*4:]
 			fmt.Println("结果是：", res1)
-			changdu, err = conn.Read(buff)
+		} else {
+			break
 		}
 	}
 	if err == io.EOF {
