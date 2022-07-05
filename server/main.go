@@ -35,7 +35,26 @@ func printShow(conn *net.TCPConn) {
 	}
 
 	fmt.Println("长度不大于0了, err 是： ", err)
+}
 
+func printAddTwo(conn *net.TCPConn) {
+	buff := make([]byte, 8)
+	var err error
+	for {
+		l1, err := io.ReadFull(conn, buff)
+		if err != nil {
+			break
+		}
+		fmt.Println("接收到了：", l1, "个byte")
+		v1 := BytesToInt(buff[0:4])
+		v2 := BytesToInt(buff[4:])
+		sum := v1 + v2
+		fmt.Println(v1, v2, "和是：", sum)
+		conn.Write(IntToBytes(sum))
+	}
+	if err == io.EOF {
+		fmt.Println("完了，完了，芭比Q了", err)
+	}
 }
 
 func BytesToInt(b []byte) int {
@@ -43,6 +62,14 @@ func BytesToInt(b []byte) int {
 	var x int32
 	binary.Read(bytesBuffer, binary.BigEndian, &x)
 	return int(x)
+}
+
+func IntToBytes(n int) []byte {
+	x := int32(n)
+
+	bytesBuffer := bytes.NewBuffer([]byte{})
+	binary.Write(bytesBuffer, binary.BigEndian, x)
+	return bytesBuffer.Bytes()
 }
 
 func main() {
@@ -60,6 +87,6 @@ func main() {
 			log.Fatalln("accept出错啦：", err)
 		}
 		fmt.Println("咦！有个臭活现上钩了！", conn.RemoteAddr())
-		go printShow(conn)
+		go printAddTwo(conn)
 	}
 }
