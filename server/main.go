@@ -1,12 +1,11 @@
 package main
 
 import (
-	"bytes"
-	"encoding/binary"
 	"fmt"
 	"io"
 	"log"
 	"net"
+	"xiaofeiyang/common"
 )
 
 func printShow(conn *net.TCPConn) {
@@ -22,7 +21,7 @@ func printShow(conn *net.TCPConn) {
 			var res1 []int
 			i := 0
 			for ; i < xianyoude/4; i++ {
-				res1 = append(res1, BytesToInt(res[i*4:(i+1)*4]))
+				res1 = append(res1, common.BytesToInt(res[i*4:(i+1)*4]))
 			}
 			res = res[i*4:]
 			fmt.Println("结果是：", res1)
@@ -46,11 +45,11 @@ func printAddTwo(conn *net.TCPConn) {
 			break
 		}
 		fmt.Println("接收到了：", l1, "个byte")
-		v1 := BytesToInt(buff[0:4])
-		v2 := BytesToInt(buff[4:])
+		v1 := common.BytesToInt(buff[0:4])
+		v2 := common.BytesToInt(buff[4:])
 		sum := v1 + v2
 		fmt.Println(v1, v2, "和是：", sum)
-		conn.Write(IntToBytes(sum))
+		conn.Write(common.IntToBytes(sum))
 	}
 	if err == io.EOF {
 		fmt.Println("完了，完了，芭比Q了", err)
@@ -65,7 +64,7 @@ func printAddMany(conn *net.TCPConn) {
 		if err != nil {
 			break
 		}
-		l2 := BytesToInt(zongchangdu)
+		l2 := common.BytesToInt(zongchangdu)
 		fmt.Println("客户端说，他要给我发", l2, "个数字，让我算和")
 		allbytes := make([]byte, l2*4)
 		_, err = io.ReadFull(conn, allbytes)
@@ -75,31 +74,16 @@ func printAddMany(conn *net.TCPConn) {
 		sum := 0
 		var ar1 []int
 		for i := 0; i < l2; i++ {
-			a1 := BytesToInt(allbytes[i : (i+1)*4])
+			a1 := common.BytesToInt(allbytes[i*4 : (i+1)*4])
 			ar1 = append(ar1, a1)
 			sum += a1
 		}
 		fmt.Println("算出来了，和是：", sum, "数组是：", ar1)
-		conn.Write(IntToBytes(sum))
+		conn.Write(common.IntToBytes(sum))
 	}
 	if err == io.EOF {
 		fmt.Println("完了，完了，芭比Q了", err)
 	}
-}
-
-func BytesToInt(b []byte) int {
-	bytesBuffer := bytes.NewBuffer(b)
-	var x int32
-	binary.Read(bytesBuffer, binary.BigEndian, &x)
-	return int(x)
-}
-
-func IntToBytes(n int) []byte {
-	x := int32(n)
-
-	bytesBuffer := bytes.NewBuffer([]byte{})
-	binary.Write(bytesBuffer, binary.BigEndian, x)
-	return bytesBuffer.Bytes()
 }
 
 func main() {
