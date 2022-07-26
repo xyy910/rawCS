@@ -114,12 +114,32 @@ func sendToServer(conn *net.TCPConn, abc *XieyiBody) {
 	if err != nil {
 		log.Fatalln("出错了！", err)
 	}
-	buflen := len(a1)
+	baowen := abc.Method + "\n" + string(a1)
+	a2 := []byte(baowen)
+	buflen := len(a2)
 	conn.Write(IntToBytes(buflen))
 	for j := 0; j < buflen; j++ {
-		conn.Write(a1[j : j+1])
+		conn.Write(a2[j : j+1])
 	}
 	fmt.Println("发送过去，", len(abc.Ars), abc.Ars, "让服务器：", abc.Method)
+}
+
+func sendMultiText(conn *net.TCPConn) {
+	baowen := "chouhuoxian jiushini \n" +
+		"xianhuochou dapanglian \n" +
+		"lianpangda"
+	baowen1 := []rune(baowen)
+	var baowen2 []byte
+	for _, zifu := range baowen1 {
+		baowen2 = append(baowen2, []byte(string(zifu))...)
+	}
+	buflen := len(baowen2)
+	conn.Write(IntToBytes(buflen))
+	for j := 0; j < buflen; j++ {
+		conn.Write(baowen2[j : j+1])
+	}
+	fmt.Println("发送过去，", buflen, "个byte, 内容是：")
+	fmt.Println(baowen)
 }
 
 func main() {

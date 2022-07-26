@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"strings"
 )
 
 func BytesToInt(b []byte) int {
@@ -163,6 +164,57 @@ func arMulti(a []int) int {
 	}
 	return sum
 }
+
+func receiveMultiLines(conn *net.TCPConn) {
+	zongchangdu := make([]byte, 4)
+	var allbytes []byte
+	var err error
+	for {
+		_, err = io.ReadFull(conn, zongchangdu)
+		if err != nil {
+			break
+		}
+		l2 := BytesToInt(zongchangdu)
+		fmt.Println("收到了客户端告诉我的总长度是：", l2)
+		allbytes = make([]byte, l2)
+		_, err = io.ReadFull(conn, allbytes)
+		if err != nil {
+			break
+		}
+		baowen := string(allbytes)
+		lines := strings.Split(baowen, "\n")
+		fmt.Println("我看看按杠n切割好使不好使， 收到了：", len(lines), "行")
+		for _, line := range lines {
+			fmt.Println(line)
+		}
+		method := lines[0]
+		neirong := lines[1]
+		neirong1 := []byte(neirong)
+		var s1 XieyiBody
+		err = json.Unmarshal(neirong1, &s1)
+		if err != nil {
+			fmt.Println("解析body的时候出错了: ", err)
+			continue
+		}
+		res := 0
+		switch method {
+		case "add":
+			res = arSums(s1.Ars)
+			break
+		case "multi":
+			res = arMulti(s1.Ars)
+			break
+		default:
+			res = -1
+		}
+		fmt.Println("算出来了，客户端让", method, len(s1.Ars), s1.Ars, "结果是：", res)
+		conn.Write(IntToBytes(res))
+	}
+	if err != nil {
+		fmt.Println("瞅瞅客户端发了神马：", err)
+	}
+}
+
 func main() {
 	address := net.TCPAddr{
 		IP:   net.ParseIP("127.0.0.1"),
@@ -178,6 +230,6 @@ func main() {
 			log.Fatalln("accept出错啦：", err)
 		}
 		fmt.Println("咦！有个臭活现上钩了！", conn.RemoteAddr())
-		go printFuzaStruct(conn)
+		go receiveMultiLines(conn)
 	}
 }
